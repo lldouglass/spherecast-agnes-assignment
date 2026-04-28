@@ -1,0 +1,152 @@
+[
+  {
+    "raw_line": {
+      "line_id": "scan-1",
+      "raw_sku": "SKU-13",
+      "raw_title": "PRODUCT ONE version 3",
+      "quantity": 15000,
+      "delivery_date": "2026-06-01",
+      "total_price": 35000,
+      "currency": null,
+      "source": "attachment",
+      "confidence": 0.97
+    },
+    "decision": "no_action",
+    "matched_product": {
+      "product_id": 5,
+      "sku": "SKU-1-3",
+      "title": "PRODUCT ONE | GLOBAL VERSION updated v3",
+      "supplier_sku": "SKU13"
+    },
+    "match_score": 2.3259,
+    "changes": {},
+    "ignored_fields": [
+      {
+        "field": "delivery_date",
+        "value": "2026-06-01",
+        "reason": "Superseded by newer supplier email note."
+      },
+      {
+        "field": "total_price",
+        "value": 35000,
+        "reason": "The current schema stores supplier-level price_per_unit, not PO-line total price."
+      }
+    ],
+    "flags": []
+  },
+  {
+    "raw_line": {
+      "line_id": "scan-2",
+      "raw_sku": "SKU-1",
+      "raw_title": null,
+      "quantity": 10000,
+      "delivery_date": null,
+      "total_price": 9000,
+      "currency": null,
+      "source": "attachment",
+      "confidence": 0.97
+    },
+    "decision": "no_action",
+    "matched_product": {
+      "product_id": 1,
+      "sku": "SKU-1",
+      "title": "PRODUCT ONE | GLOBAL VERSION",
+      "supplier_sku": null
+    },
+    "match_score": 1.0,
+    "changes": {},
+    "ignored_fields": [
+      {
+        "field": "total_price",
+        "value": 9000,
+        "reason": "The current schema stores supplier-level price_per_unit, not PO-line total price."
+      }
+    ],
+    "flags": []
+  },
+  {
+    "raw_line": {
+      "line_id": "scan-3",
+      "raw_sku": "SKU-2",
+      "raw_title": null,
+      "quantity": 500,
+      "delivery_date": "2026-07-01",
+      "total_price": null,
+      "currency": null,
+      "source": "attachment",
+      "confidence": 0.97
+    },
+    "decision": "auto_apply",
+    "matched_product": {
+      "product_id": 2,
+      "sku": "SKU-2",
+      "title": "PRODUCT TWO with Vitamin A, B, C",
+      "supplier_sku": null
+    },
+    "match_score": 1.0,
+    "changes": {
+      "quantity": {
+        "old": 200,
+        "new": 500,
+        "source": "attachment"
+      },
+      "delivery_date": {
+        "old": "2026-01-15",
+        "new": "2026-07-01",
+        "source": "attachment"
+      }
+    },
+    "ignored_fields": [],
+    "flags": []
+  },
+  {
+    "raw_line": {
+      "line_id": "scan-4",
+      "raw_sku": "SKU-3",
+      "raw_title": null,
+      "quantity": 500,
+      "delivery_date": "2025-06-01",
+      "total_price": null,
+      "currency": null,
+      "source": "attachment",
+      "confidence": 0.97
+    },
+    "decision": "auto_apply",
+    "matched_product": {
+      "product_id": 3,
+      "sku": "SKU-3",
+      "title": "-",
+      "supplier_sku": null
+    },
+    "match_score": 1.0,
+    "changes": {
+      "quantity": {
+        "old": 300,
+        "new": 500,
+        "source": "attachment"
+      }
+    },
+    "ignored_fields": [],
+    "flags": [
+      "suspicious_earlier_delivery_date"
+    ]
+  },
+  {
+    "raw_line": {
+      "line_id": "scan-5",
+      "raw_sku": "SKU-7",
+      "raw_title": "[Secret] product version 4",
+      "quantity": 1000,
+      "delivery_date": null,
+      "total_price": null,
+      "currency": null,
+      "source": "attachment",
+      "confidence": 0.95
+    },
+    "decision": "review",
+    "matched_product": null,
+    "flags": [
+      "unmatched_or_ambiguous_product"
+    ]
+  }
+]

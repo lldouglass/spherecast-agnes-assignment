@@ -1,0 +1,14 @@
+{
+  "matched_purchase_order": {
+    "purchase_order_id": 1,
+    "reference_num": "PO-12",
+    "supplier": {
+      "supplier_id": 1,
+      "name": "Big Supplier",
+      "email": "big@supplier.com"
+    }
+  },
+  "auto_apply_count": 2,
+  "review_count": 3,
+  "schema_gap_count": 2
+}

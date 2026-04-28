@@ -1,0 +1,58 @@
+{
+  "extraction_path": "/Users/openclaw/.openclaw/workspace/job-search/spherecast-agnes-assignment/outputs/extracted_mock_api_verify.json",
+  "passed": true,
+  "passed_count": 6,
+  "total_checks": 6,
+  "checks": [
+    {
+      "name": "matched_po_is_po_12",
+      "passed": true,
+      "details": {
+        "actual_reference_num": "PO-12"
+      }
+    },
+    {
+      "name": "sku_13_resolves_to_sku_1_3",
+      "passed": true,
+      "details": {
+        "actual_match": "SKU-1-3"
+      }
+    },
+    {
+      "name": "sku_2_auto_applies_quantity_and_date",
+      "passed": true,
+      "details": {
+        "decision": "auto_apply",
+        "change_fields": [
+          "delivery_date",
+          "quantity"
+        ]
+      }
+    },
+    {
+      "name": "sku_3_quantity_updates_while_date_is_review_only",
+      "passed": true,
+      "details": {
+        "change_fields": [
+          "quantity"
+        ],
+        "has_delivery_date_review": true
+      }
+    },
+    {
+      "name": "sku_7_goes_to_review",
+      "passed": true,
+      "details": {
+        "found_review_item": true
+      }
+    },
+    {
+      "name": "schema_gaps_preserve_terms_and_external_ref",
+      "passed": true,
+      "details": {
+        "terms": "DAP",
+        "external_purchasing_ref_number": "43123"
+      }
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+[
+  {
+    "decision": "auto_apply",
+    "target": {
+      "table": "purchase_order_line",
+      "id": 2
+    },
+    "matched_product": {
+      "product_id": 2,
+      "sku": "SKU-2",
+      "title": "PRODUCT TWO with Vitamin A, B, C"
+    },
+    "match_confidence": 1.0,
+    "match_reasons": [
+      "exact canonical SKU match",
+      "product is approved for this supplier"
+    ],
+    "changes": {
+      "quantity": {
+        "old": 200,
+        "new": 500,
+        "source": "attachment"
+      },
+      "delivery_date": {
+        "old": "2026-01-15",
+        "new": "2026-07-01",
+        "source": "attachment"
+      }
+    },
+    "ignored_fields": [],
+    "related_review_flags": []
+  },
+  {
+    "decision": "auto_apply",
+    "target": {
+      "table": "purchase_order_line",
+      "id": 3
+    },
+    "matched_product": {
+      "product_id": 3,
+      "sku": "SKU-3",
+      "title": "-"
+    },
+    "match_confidence": 1.0,
+    "match_reasons": [
+      "exact canonical SKU match",
+      "product is approved for this supplier"
+    ],
+    "changes": {
+      "quantity": {
+        "old": 300,
+        "new": 500,
+        "source": "attachment"
+      }
+    },
+    "ignored_fields": [],
+    "related_review_flags": [
+      "suspicious_earlier_delivery_date"
+    ]
+  }
+]

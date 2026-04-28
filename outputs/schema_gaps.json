@@ -1,0 +1,12 @@
+[
+  {
+    "field": "external_purchasing_ref_number",
+    "value": "43123",
+    "reason": "Not represented in the sample relational schema."
+  },
+  {
+    "field": "terms",
+    "value": "DAP",
+    "reason": "Not represented in the sample relational schema."
+  }
+]
