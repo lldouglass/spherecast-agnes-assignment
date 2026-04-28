@@ -1,5 +1,5 @@
 {
-  "extraction_path": "/Users/openclaw/.openclaw/workspace/job-search/spherecast-agnes-assignment/outputs/extracted_mock_api_verify.json",
+  "extraction_path": "outputs/extracted_mock_api_verify.json",
   "passed": true,
   "passed_count": 6,
   "total_checks": 6,

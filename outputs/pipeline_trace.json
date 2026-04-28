@@ -9,7 +9,7 @@
   ],
   "stages": {
     "input": {
-      "db_path": "/Users/openclaw/.openclaw/workspace/job-search/spherecast-agnes-assignment/data/sample_db.xlsx",
+      "db_path": "data/sample_db.xlsx",
       "table_counts": {
         "explanation": 3,
         "product": 5,
@@ -24,7 +24,7 @@
       ]
     },
     "extraction": {
-      "extraction_path": "/Users/openclaw/.openclaw/workspace/job-search/spherecast-agnes-assignment/data/extracted_fixture.json",
+      "extraction_path": "data/extracted_fixture.json",
       "document_type": "purchase_order",
       "source_email": {
         "from": "big@supplier.com",

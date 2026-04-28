@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from pipeline import run_pipeline
+from pipeline import REPO_ROOT, run_pipeline
 
 
 def write_json(path: Path, payload: dict | list) -> None:
@@ -40,6 +40,14 @@ def has_review_for_raw_sku(result: dict[str, Any], raw_sku: str) -> bool:
 
 def schema_gap_map(result: dict[str, Any]) -> dict[str, Any]:
     return {item["field"]: item["value"] for item in result["schema_gaps"]}
+
+
+def display_path(path: str | Path) -> str:
+    path = Path(path)
+    try:
+        return str(path.resolve().relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
 
 
 def build_report(result: dict[str, Any], extraction_path: str) -> dict[str, Any]:
@@ -109,7 +117,7 @@ def build_report(result: dict[str, Any], extraction_path: str) -> dict[str, Any]
 
     passed_count = sum(1 for item in checks if item["passed"])
     return {
-        "extraction_path": extraction_path,
+        "extraction_path": display_path(extraction_path),
         "passed": passed_count == len(checks),
         "passed_count": passed_count,
         "total_checks": len(checks),

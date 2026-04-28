@@ -8,6 +8,7 @@ from excel_loader import load_xlsx_tables
 from resolver import resolve_document_with_trace
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 STAGE_ORDER = ["input", "extraction", "resolution", "validation", "decision"]
 
 
@@ -19,9 +20,16 @@ def load_structured_extraction(extraction_path: str | Path) -> dict[str, Any]:
     return json.loads(Path(extraction_path).read_text(encoding="utf-8"))
 
 
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
+
+
 def build_input_stage(db_path: Path, tables: dict[str, list[dict]]) -> dict[str, Any]:
     return {
-        "db_path": str(db_path),
+        "db_path": _display_path(db_path),
         "table_counts": {name: len(rows) for name, rows in tables.items()},
         "notes": [
             "Reference state is loaded from the provided Excel workbook.",
@@ -34,7 +42,7 @@ def build_extraction_stage(extraction_path: Path, extraction: dict[str, Any]) ->
     source_email = extraction.get("source_email", {})
     header_fields = extraction.get("header_fields", {})
     return {
-        "extraction_path": str(extraction_path),
+        "extraction_path": _display_path(extraction_path),
         "document_type": extraction.get("document_type"),
         "source_email": {
             "from": source_email.get("from"),
