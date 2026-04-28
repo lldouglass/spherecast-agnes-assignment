@@ -1,0 +1,720 @@
+{
+  "artifact_version": 1,
+  "stage_order": [
+    "input",
+    "extraction",
+    "resolution",
+    "validation",
+    "decision"
+  ],
+  "stages": {
+    "input": {
+      "db_path": "/Users/openclaw/.openclaw/workspace/job-search/spherecast-agnes-assignment/data/sample_db.xlsx",
+      "table_counts": {
+        "explanation": 3,
+        "product": 5,
+        "purchase_order": 3,
+        "purchase_order_line": 7,
+        "supplier": 2,
+        "supplier_product": 5
+      },
+      "notes": [
+        "Reference state is loaded from the provided Excel workbook.",
+        "The resolver never writes directly back into the workbook."
+      ]
+    },
+    "extraction": {
+      "extraction_path": "/Users/openclaw/.openclaw/workspace/job-search/spherecast-agnes-assignment/outputs/extracted_mock_api_verify.json",
+      "document_type": "purchase_order",
+      "source_email": {
+        "from": "big@supplier.com",
+        "subject": "Scanned purchase order",
+        "body_preview": "Hey there,\n\nPlease see attached scanned purchase order.\n\nImportant note: we had to push back the eta for SKU-1-3 even further back to 02/01/2027."
+      },
+      "header_fields": {
+        "purchasing_ref_number": {
+          "value": "12",
+          "source": "attachment",
+          "confidence": 0.99
+        },
+        "external_purchasing_ref_number": {
+          "value": "43123",
+          "source": "attachment",
+          "confidence": 0.91
+        },
+        "terms": {
+          "value": "DAP",
+          "source": "attachment",
+          "confidence": 0.96
+        }
+      },
+      "line_item_count": 5,
+      "note_update_count": 1,
+      "notes": [
+        "This stage consumes a structured extraction payload.",
+        "In the live path, app/extract_live.py produces this JSON from the raw email body plus attachment image."
+      ]
+    },
+    "resolution": {
+      "matched_purchase_order": {
+        "purchase_order_id": 1,
+        "reference_num": "PO-12",
+        "supplier": {
+          "supplier_id": 1,
+          "name": "Big Supplier",
+          "email": "big@supplier.com"
+        }
+      },
+      "line_match_attempts": [
+        {
+          "line_id": "scan-1",
+          "raw_sku": "SKU-13",
+          "candidate_matches": [
+            {
+              "product": {
+                "id": 5,
+                "sku": "SKU-1-3",
+                "title": "PRODUCT ONE | GLOBAL VERSION updated v3"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 5,
+                "supplier_sku": "SKU13",
+                "price_per_unit": 2
+              },
+              "score": 2.3259,
+              "reasons": [
+                "exact supplier SKU match",
+                "exact canonical SKU match",
+                "title similarity 0.72",
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 1,
+                "sku": "SKU-1",
+                "title": "PRODUCT ONE | GLOBAL VERSION"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 1,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.4138,
+              "reasons": [
+                "title similarity 0.81",
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 2,
+                "sku": "SKU-2",
+                "title": "PRODUCT TWO with Vitamin A, B, C"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 2,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.2971,
+              "reasons": [
+                "title similarity 0.55",
+                "product is approved for this supplier"
+              ]
+            }
+          ],
+          "selected_match": {
+            "product_id": 5,
+            "sku": "SKU-1-3",
+            "title": "PRODUCT ONE | GLOBAL VERSION updated v3",
+            "score": 2.3259,
+            "reasons": [
+              "exact supplier SKU match",
+              "exact canonical SKU match",
+              "title similarity 0.72",
+              "product is approved for this supplier"
+            ]
+          },
+          "selection_status": "matched"
+        },
+        {
+          "line_id": "scan-2",
+          "raw_sku": "SKU-1",
+          "candidate_matches": [
+            {
+              "product": {
+                "id": 1,
+                "sku": "SKU-1",
+                "title": "PRODUCT ONE | GLOBAL VERSION"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 1,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 1.0,
+              "reasons": [
+                "exact canonical SKU match",
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 2,
+                "sku": "SKU-2",
+                "title": "PRODUCT TWO with Vitamin A, B, C"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 2,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.05,
+              "reasons": [
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 3,
+                "sku": "SKU-3",
+                "title": "-"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 3,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.05,
+              "reasons": [
+                "product is approved for this supplier"
+              ]
+            }
+          ],
+          "selected_match": {
+            "product_id": 1,
+            "sku": "SKU-1",
+            "title": "PRODUCT ONE | GLOBAL VERSION",
+            "score": 1.0,
+            "reasons": [
+              "exact canonical SKU match",
+              "product is approved for this supplier"
+            ]
+          },
+          "selection_status": "matched"
+        },
+        {
+          "line_id": "scan-3",
+          "raw_sku": "SKU-2",
+          "candidate_matches": [
+            {
+              "product": {
+                "id": 2,
+                "sku": "SKU-2",
+                "title": "PRODUCT TWO with Vitamin A, B, C"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 2,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 1.0,
+              "reasons": [
+                "exact canonical SKU match",
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 1,
+                "sku": "SKU-1",
+                "title": "PRODUCT ONE | GLOBAL VERSION"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 1,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.05,
+              "reasons": [
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 3,
+                "sku": "SKU-3",
+                "title": "-"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 3,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.05,
+              "reasons": [
+                "product is approved for this supplier"
+              ]
+            }
+          ],
+          "selected_match": {
+            "product_id": 2,
+            "sku": "SKU-2",
+            "title": "PRODUCT TWO with Vitamin A, B, C",
+            "score": 1.0,
+            "reasons": [
+              "exact canonical SKU match",
+              "product is approved for this supplier"
+            ]
+          },
+          "selection_status": "matched"
+        },
+        {
+          "line_id": "scan-4",
+          "raw_sku": "SKU-3",
+          "candidate_matches": [
+            {
+              "product": {
+                "id": 3,
+                "sku": "SKU-3",
+                "title": "-"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 3,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 1.0,
+              "reasons": [
+                "exact canonical SKU match",
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 1,
+                "sku": "SKU-1",
+                "title": "PRODUCT ONE | GLOBAL VERSION"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 1,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.05,
+              "reasons": [
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 2,
+                "sku": "SKU-2",
+                "title": "PRODUCT TWO with Vitamin A, B, C"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 2,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.05,
+              "reasons": [
+                "product is approved for this supplier"
+              ]
+            }
+          ],
+          "selected_match": {
+            "product_id": 3,
+            "sku": "SKU-3",
+            "title": "-",
+            "score": 1.0,
+            "reasons": [
+              "exact canonical SKU match",
+              "product is approved for this supplier"
+            ]
+          },
+          "selection_status": "matched"
+        },
+        {
+          "line_id": "scan-5",
+          "raw_sku": "SKU-7",
+          "candidate_matches": [
+            {
+              "product": {
+                "id": 1,
+                "sku": "SKU-1",
+                "title": "PRODUCT ONE | GLOBAL VERSION"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 1,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.364,
+              "reasons": [
+                "title similarity 0.70",
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 5,
+                "sku": "SKU-1-3",
+                "title": "PRODUCT ONE | GLOBAL VERSION updated v3"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 5,
+                "supplier_sku": "SKU13",
+                "price_per_unit": 2
+              },
+              "score": 0.3167,
+              "reasons": [
+                "title similarity 0.59",
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 2,
+                "sku": "SKU-2",
+                "title": "PRODUCT TWO with Vitamin A, B, C"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 2,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.2798,
+              "reasons": [
+                "title similarity 0.51",
+                "product is approved for this supplier"
+              ]
+            }
+          ],
+          "selected_match": null,
+          "selection_status": "review"
+        }
+      ]
+    },
+    "validation": {
+      "line_validations": [
+        {
+          "line_id": "scan-1",
+          "raw_sku": "SKU-13",
+          "matched_product_sku": "SKU-1-3",
+          "existing_po_line_id": 4,
+          "pending_change_fields": [],
+          "ignored_fields": [
+            {
+              "field": "delivery_date",
+              "value": "2026-06-01",
+              "reason": "Superseded by newer supplier email note."
+            },
+            {
+              "field": "total_price",
+              "value": 35000,
+              "reason": "The current schema stores supplier-level price_per_unit, not PO-line total price."
+            }
+          ],
+          "review_reasons": [],
+          "flags": [],
+          "decision": "no_action"
+        },
+        {
+          "line_id": "scan-2",
+          "raw_sku": "SKU-1",
+          "matched_product_sku": "SKU-1",
+          "existing_po_line_id": 1,
+          "pending_change_fields": [],
+          "ignored_fields": [
+            {
+              "field": "total_price",
+              "value": 9000,
+              "reason": "The current schema stores supplier-level price_per_unit, not PO-line total price."
+            }
+          ],
+          "review_reasons": [],
+          "flags": [],
+          "decision": "no_action"
+        },
+        {
+          "line_id": "scan-3",
+          "raw_sku": "SKU-2",
+          "matched_product_sku": "SKU-2",
+          "existing_po_line_id": 2,
+          "pending_change_fields": [
+            "delivery_date",
+            "quantity"
+          ],
+          "ignored_fields": [],
+          "review_reasons": [],
+          "flags": [],
+          "decision": "auto_apply"
+        },
+        {
+          "line_id": "scan-4",
+          "raw_sku": "SKU-3",
+          "matched_product_sku": "SKU-3",
+          "existing_po_line_id": 3,
+          "pending_change_fields": [
+            "quantity"
+          ],
+          "ignored_fields": [],
+          "review_reasons": [
+            "Delivery date moved materially earlier than the current PO date and may be bad data."
+          ],
+          "flags": [
+            "suspicious_earlier_delivery_date"
+          ],
+          "decision": "auto_apply"
+        },
+        {
+          "line_id": "scan-5",
+          "raw_sku": "SKU-7",
+          "matched_product_sku": null,
+          "existing_po_line_id": null,
+          "pending_change_fields": [],
+          "ignored_fields": [],
+          "review_reasons": [
+            "Could not safely match extracted line to a single supplier-approved product."
+          ],
+          "flags": [
+            "unmatched_or_ambiguous_product"
+          ],
+          "decision": "review"
+        }
+      ],
+      "note_update_validations": [
+        {
+          "sku_hint": "SKU-1-3",
+          "matched_product_sku": "SKU-1-3",
+          "decision": "review",
+          "reason": "Supplier email provides a newer ETA, but the slash-formatted date is locale-ambiguous.",
+          "normalized_candidates": [
+            "2027-02-01",
+            "2027-01-02"
+          ],
+          "flags": [
+            "email_overrides_attachment",
+            "ambiguous_slash_date"
+          ]
+        }
+      ],
+      "schema_gaps": [
+        {
+          "field": "external_purchasing_ref_number",
+          "value": "43123",
+          "reason": "Not represented in the sample relational schema."
+        },
+        {
+          "field": "terms",
+          "value": "DAP",
+          "reason": "Not represented in the sample relational schema."
+        }
+      ]
+    },
+    "decision": {
+      "summary": {
+        "auto_apply_count": 2,
+        "review_count": 3,
+        "schema_gap_count": 2,
+        "no_action_count": 2
+      },
+      "auto_apply_targets": [
+        {
+          "target": {
+            "table": "purchase_order_line",
+            "id": 2
+          },
+          "matched_product_sku": "SKU-2",
+          "change_fields": [
+            "delivery_date",
+            "quantity"
+          ],
+          "match_confidence": 1.0
+        },
+        {
+          "target": {
+            "table": "purchase_order_line",
+            "id": 3
+          },
+          "matched_product_sku": "SKU-3",
+          "change_fields": [
+            "quantity"
+          ],
+          "match_confidence": 1.0
+        }
+      ],
+      "review_queue": [
+        {
+          "decision": "review",
+          "reason": "Delivery date moved materially earlier than the current PO date and may be bad data.",
+          "target": {
+            "table": "purchase_order_line",
+            "id": 3
+          },
+          "matched_product": {
+            "product_id": 3,
+            "sku": "SKU-3",
+            "title": "-"
+          },
+          "proposed_field_change": {
+            "field": "delivery_date",
+            "current": "2026-01-15",
+            "candidate": "2025-06-01",
+            "source": "attachment"
+          },
+          "flags": [
+            "suspicious_earlier_delivery_date"
+          ]
+        },
+        {
+          "decision": "review",
+          "reason": "Could not safely match extracted line to a single supplier-approved product.",
+          "raw_line": {
+            "line_id": "scan-5",
+            "raw_sku": "SKU-7",
+            "raw_title": "[Secret] product version 4",
+            "quantity": 1000,
+            "delivery_date": null,
+            "total_price": null,
+            "currency": null,
+            "source": "attachment",
+            "confidence": 0.84
+          },
+          "candidate_matches": [
+            {
+              "product": {
+                "id": 1,
+                "sku": "SKU-1",
+                "title": "PRODUCT ONE | GLOBAL VERSION"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 1,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.364,
+              "reasons": [
+                "title similarity 0.70",
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 5,
+                "sku": "SKU-1-3",
+                "title": "PRODUCT ONE | GLOBAL VERSION updated v3"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 5,
+                "supplier_sku": "SKU13",
+                "price_per_unit": 2
+              },
+              "score": 0.3167,
+              "reasons": [
+                "title similarity 0.59",
+                "product is approved for this supplier"
+              ]
+            },
+            {
+              "product": {
+                "id": 2,
+                "sku": "SKU-2",
+                "title": "PRODUCT TWO with Vitamin A, B, C"
+              },
+              "supplier_product": {
+                "supplier_id": 1,
+                "product_id": 2,
+                "supplier_sku": null,
+                "price_per_unit": 1
+              },
+              "score": 0.2798,
+              "reasons": [
+                "title similarity 0.51",
+                "product is approved for this supplier"
+              ]
+            }
+          ],
+          "flags": [
+            "unmatched_or_ambiguous_product"
+          ]
+        },
+        {
+          "decision": "review",
+          "reason": "Supplier email provides a newer ETA, but the slash-formatted date is locale-ambiguous.",
+          "target": {
+            "table": "purchase_order_line",
+            "id": 4
+          },
+          "matched_product": {
+            "product_id": 5,
+            "sku": "SKU-1-3",
+            "title": "PRODUCT ONE | GLOBAL VERSION updated v3",
+            "supplier_sku": "SKU13"
+          },
+          "proposed_field_change": {
+            "field": "delivery_date",
+            "current": "2026-01-15",
+            "raw_value": "02/01/2027",
+            "normalized_candidates": [
+              "2027-02-01",
+              "2027-01-02"
+            ],
+            "source": "email_body"
+          },
+          "flags": [
+            "email_overrides_attachment",
+            "ambiguous_slash_date"
+          ]
+        }
+      ],
+      "schema_gaps": [
+        {
+          "field": "external_purchasing_ref_number",
+          "value": "43123",
+          "reason": "Not represented in the sample relational schema."
+        },
+        {
+          "field": "terms",
+          "value": "DAP",
+          "reason": "Not represented in the sample relational schema."
+        }
+      ],
+      "no_action_lines": [
+        {
+          "line_id": "scan-1",
+          "raw_sku": "SKU-13",
+          "matched_product_sku": "SKU-1-3"
+        },
+        {
+          "line_id": "scan-2",
+          "raw_sku": "SKU-1",
+          "matched_product_sku": "SKU-1"
+        }
+      ],
+      "notes": [
+        "Validation findings are converted into either staged auto-apply updates, review items, or no-action outcomes.",
+        "Observed validation traces: 5 line validations and 1 note validations."
+      ]
+    }
+  }
+}

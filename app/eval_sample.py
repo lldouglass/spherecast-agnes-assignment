@@ -5,8 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from excel_loader import load_xlsx_tables
-from resolver import resolve_document
+from pipeline import run_pipeline
 
 
 def write_json(path: Path, payload: dict | list) -> None:
@@ -130,10 +129,8 @@ def main() -> None:
     extraction_path = (root / args.extraction).resolve()
     out_path = (root / args.out).resolve()
 
-    tables = load_xlsx_tables(db_path)
-    extraction = json.loads(extraction_path.read_text(encoding="utf-8"))
-    result = resolve_document(extraction, tables)
-    report = build_report(result, str(extraction_path))
+    bundle = run_pipeline(db_path, extraction_path)
+    report = build_report(bundle["result"], str(extraction_path))
     write_json(out_path, report)
     print(json.dumps(report, indent=2))
 

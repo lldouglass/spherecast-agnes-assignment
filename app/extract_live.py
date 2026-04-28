@@ -362,14 +362,14 @@ def main() -> None:
     parser.add_argument("--email-subject", default="Scanned purchase order")
     parser.add_argument("--out", default="outputs/extracted_live.json")
     parser.add_argument("--base-url", default=os.getenv("ANTHROPIC_BASE_URL", "https://api.anthropic.com"))
-    parser.add_argument("--model", default=os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-latest"))
+    parser.add_argument("--model", default=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6"))
     args = parser.parse_args()
 
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         raise SystemExit(
             "ANTHROPIC_API_KEY is not set. Example:\n"
-            "ANTHROPIC_API_KEY=... ANTHROPIC_MODEL=claude-3-5-sonnet-latest "
+            "ANTHROPIC_API_KEY=... ANTHROPIC_MODEL=claude-sonnet-4-6 "
             "python3 -B app/extract_live.py --out outputs/extracted_live.json"
         )
 

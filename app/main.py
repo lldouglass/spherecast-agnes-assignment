@@ -4,8 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from excel_loader import load_xlsx_tables
-from resolver import resolve_document
+from pipeline import run_pipeline
 
 
 def write_json(path: Path, payload: dict | list) -> None:
@@ -18,16 +17,18 @@ def main() -> None:
     parser.add_argument("--db", default="data/sample_db.xlsx")
     parser.add_argument("--extraction", default="data/extracted_fixture.json")
     parser.add_argument("--outdir", default="outputs")
+    parser.add_argument("--trace-out", default=None, help="Optional explicit path for the pipeline trace artifact.")
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[1]
     db_path = (root / args.db).resolve()
     extraction_path = (root / args.extraction).resolve()
     outdir = (root / args.outdir).resolve()
+    trace_out = (root / args.trace_out).resolve() if args.trace_out else outdir / "pipeline_trace.json"
 
-    tables = load_xlsx_tables(db_path)
-    extraction = json.loads(extraction_path.read_text(encoding="utf-8"))
-    result = resolve_document(extraction, tables)
+    bundle = run_pipeline(db_path, extraction_path)
+    result = bundle["result"]
+    trace = bundle["trace"]
 
     summary = {
         "matched_purchase_order": result["matched_purchase_order"],
@@ -41,6 +42,7 @@ def main() -> None:
     write_json(outdir / "proposed_updates.json", result["proposed_updates"])
     write_json(outdir / "review_queue.json", result["review_queue"])
     write_json(outdir / "schema_gaps.json", result["schema_gaps"])
+    write_json(trace_out, trace)
 
     print(json.dumps(summary, indent=2))
 

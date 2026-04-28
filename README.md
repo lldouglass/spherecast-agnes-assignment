@@ -1,20 +1,21 @@
 # Spherecast - Agnes take-home
 
-This submission treats the assignment as a **production-safe transaction ingestion problem**, not just a document extraction problem.
+This submission treats the challenge as a **production-safe transaction ingestion problem**, not just a document extraction problem.
 
 The core idea is simple:
 
 > Do not let an LLM write directly into operational tables.
-> Use an LLM-compatible extraction layer to produce structured candidates, then run deterministic matching, validation, and staged update decisions before anything touches production data.
+> Use an extraction layer to produce structured candidates, then run deterministic resolution, validation, and apply-or-review decisions before anything touches production data.
 
 That design choice is the difference between a flashy demo and a system that can safely support real purchase-order operations.
 
 ## What is included
 
-- `docs/approach.md` - the design doc
-- `app/` - the runnable prototype, live extraction adapter, and eval harness
-- `data/` - the assignment inputs plus a deterministic extraction fixture
-- `outputs/` - generated results from the sample run
+- `docs/approach.md` - system design and reasoning
+- `docs/failure-modes.md` - expected failure points, current hedges, and future mitigations
+- `app/` - runnable prototype, stage orchestration, live extraction adapter, and eval harness
+- `data/` - assignment inputs plus a deterministic extraction fixture
+- `outputs/` - generated results from the sample run, including a stage trace artifact
 
 ## What the prototype demonstrates
 
@@ -22,8 +23,9 @@ The prototype focuses on the hardest part of the problem:
 - matching noisy extracted fields to the right open PO and PO lines
 - deciding what can be auto-applied vs what must go to review
 - preserving provenance and safe automation boundaries
+- making stage outputs inspectable so model or rule changes are debuggable
 
-The repo now includes both paths:
+The repo includes both paths:
 - `data/extracted_fixture.json` for a deterministic offline run
 - `app/extract_live.py` for a real extraction call from the raw email text plus `data/sample_po.jpg` into resolver-compatible JSON
 
@@ -44,7 +46,7 @@ Fastest end-to-end verifier:
 bash verify.sh
 ```
 
-That script runs the offline sample, the eval harness, and a strict Anthropic-compatible mock smoke test for the live extractor.
+That script runs the offline sample, the eval harness, the stage-trace checks, and a strict Anthropic-compatible mock smoke test for the live extractor.
 
 Offline deterministic run:
 
@@ -59,6 +61,7 @@ This generates:
 - `outputs/proposed_updates.json`
 - `outputs/review_queue.json`
 - `outputs/schema_gaps.json`
+- `outputs/pipeline_trace.json`
 - `outputs/eval_report.json`
 
 Expected result for the sample:
@@ -68,7 +71,7 @@ Expected result for the sample:
 Live extraction run from the raw sample email + PO image:
 
 ```bash
-ANTHROPIC_API_KEY=... ANTHROPIC_MODEL=claude-3-5-sonnet-latest \
+ANTHROPIC_API_KEY=... ANTHROPIC_MODEL=claude-sonnet-4-6 \
 python3 -B app/extract_live.py --out outputs/extracted_live.json
 
 python3 -B app/main.py --extraction outputs/extracted_live.json
@@ -79,7 +82,7 @@ For local convenience on your own machine, you can also create an untracked repo
 
 ```bash
 ANTHROPIC_API_KEY=...
-ANTHROPIC_MODEL=claude-3-5-sonnet-latest
+ANTHROPIC_MODEL=claude-sonnet-4-6
 ```
 
 The repo should stay keyless in git. `.env.local` is only for local testing, not part of the submission contract.
@@ -96,7 +99,7 @@ In a second terminal:
 ```bash
 ANTHROPIC_API_KEY=dummy ANTHROPIC_BASE_URL=http://127.0.0.1:8765 ANTHROPIC_MODEL=mock-model \
 python3 -B app/extract_live.py --out outputs/extracted_mock_api_strict.json
-python3 -B app/main.py --extraction outputs/extracted_mock_api_strict.json
+python3 -B app/main.py --extraction outputs/extracted_mock_api_strict.json --trace-out outputs/pipeline_trace_verify.json
 python3 -B app/eval_sample.py --extraction outputs/extracted_mock_api_strict.json
 ```
 
@@ -104,7 +107,45 @@ This path writes the captured request to `outputs/mock_anthropic_request_capture
 
 Optional runtime env vars:
 - `ANTHROPIC_BASE_URL` - defaults to `https://api.anthropic.com`
-- `ANTHROPIC_MODEL` - defaults to `claude-3-5-sonnet-latest`
+- `ANTHROPIC_MODEL` - defaults to `claude-sonnet-4-6`
+
+## Stage map, in code
+
+Leon called out wanting to see the different stages clearly. The code maps to that request directly:
+
+1. **Input / ingestion boundary**
+   - `app/pipeline.py`
+   - Loads the reference workbook and the structured extraction payload.
+
+2. **Extraction**
+   - `app/extract_live.py`
+   - Converts raw email text + attachment image into structured JSON.
+   - The offline fixture in `data/extracted_fixture.json` is the deterministic equivalent of this stage.
+
+3. **Resolution**
+   - `app/resolver.py`
+   - Resolves the PO and line-item candidates against supplier-approved products and open PO lines.
+
+4. **Validation**
+   - `app/resolver.py`
+   - Applies safety rules such as ambiguous-match review, suspicious-earlier-date review, note override handling, and schema-gap preservation.
+
+5. **Decision: auto-apply vs review vs preserve**
+   - `app/pipeline.py` + `app/resolver.py`
+   - Packages the final outputs into `proposed_updates`, `review_queue`, `schema_gaps`, and `no_action` lines.
+
+## Reviewer-facing artifacts
+
+If I were reviewing this repo cold, I would look at these files first:
+
+- `outputs/pipeline_trace.json`
+  - end-to-end trace of stage outputs, candidate matches, validation findings, and final decisions
+- `docs/failure-modes.md`
+  - likely failure points, current hedges, and future hardening path
+- `app/eval_sample.py`
+  - machine-readable regression checks for the sample behaviors that matter operationally
+- `verify.sh`
+  - one-command proof that the deterministic and mocked live paths still behave correctly
 
 ## Expected sample outcome
 
@@ -118,7 +159,7 @@ For the provided sample, the pipeline:
 - sends `SKU-7` to review because it cannot be safely matched to a supplier-approved product
 - preserves non-mappable fields like `terms` and `external_purchasing_ref_number` as schema gaps instead of silently dropping or misrouting them
 
-## Why this is not "just OCR"
+## Why this is not just OCR
 
 OCR answers "what text is on the page?" Agnes needs to answer a stricter operational question:
 - which live PO does this document belong to
@@ -128,41 +169,24 @@ OCR answers "what text is on the page?" Agnes needs to answer a stricter operati
 
 The live extractor exists to prove that the resolver is wired to real raw inputs. The actual product value is in the **model + deterministic resolution + validation + review gating** stack, not in text recognition alone.
 
-## Why this approach
+## Logging, observability, and regression safety
 
-I would not build Agnes as a freeform email agent that writes directly to the database.
-I would build it as an **LLM-assisted transaction ingestion system** with:
+The CEO note also called out observability and safe stage swaps.
 
-- structured extraction
-- deterministic entity resolution
-- field-level confidence
-- staged updates
-- auditability
-- review queues for ambiguity
-- a feedback loop that improves supplier matching and extraction over time
+This repo addresses that in three concrete ways:
 
-That architecture is small enough to ship quickly, but strong enough to scale from purchase orders to transfer orders, work orders, shipments, and other supply-chain transactions.
+1. **Trace artifact**
+   - `outputs/pipeline_trace.json` makes stage outputs and decisions inspectable.
+   - It is meant to answer, "what happened at each stage, and why?"
 
-## Model, evals, and observability
+2. **Regression harness**
+   - `app/eval_sample.py` checks the operationally important outcomes, not just whether the code ran.
+   - `verify.sh` also validates the mocked live extraction request shape so swapping models/prompts/adapters is less likely to fail silently.
 
-Model selection philosophy:
-- start with one strong vision model that can jointly read the attachment and email body into structured JSON
-- optimize for extraction recall and JSON reliability first, not marginal token cost
-- only introduce tiered routing or smaller models after replay evals show which suppliers and document families are truly easy
-
-Eval / replay philosophy:
-- every model or prompt change should replay against saved raw emails, attachments, and reviewed outcomes
-- this repo now includes `app/eval_sample.py` as the seed of that discipline: a machine-readable pass/fail report over the sample behaviors that matter
-- the same pattern scales to a larger gold set built from historical reviewer-approved events
-
-Observability / feedback loop:
-- track parse failures, unmatched lines, review reasons, reviewer overrides, supplier drift, latency, and cost
-- store raw source material, extracted JSON, resolver output, and final reviewer decision so failures are debuggable and replayable
-- promote reviewer corrections into supplier alias memory and future eval cases
-
-Automation boundary:
-- auto-apply only when the PO match is clear, the line maps to a supplier-approved product, and the field change is non-ambiguous
-- review-gate ambiguous dates, unmatched lines, suspiciously earlier dates, and schema fields that cannot be written safely
+3. **Separation of concerns**
+   - extraction can change without giving the model direct write access
+   - resolver rules can change while staying replayable against saved extraction payloads
+   - validation policy can tighten or loosen without rewriting the extraction stage
 
 ## Repo structure
 
@@ -171,6 +195,7 @@ spherecast-agnes-assignment/
   README.md
   docs/
     approach.md
+    failure-modes.md
   data/
     assignment_brief.docx
     example_email.txt
@@ -178,11 +203,12 @@ spherecast-agnes-assignment/
     sample_db.xlsx
     sample_po.jpg
   app/
-    excel_loader.py
     eval_sample.py
+    excel_loader.py
     extract_live.py
     main.py
     mock_anthropic_server.py
+    pipeline.py
     resolver.py
   outputs/
     *.json
@@ -191,7 +217,7 @@ spherecast-agnes-assignment/
 ## If I had 2 to 5 more days
 
 I would add:
-- a `proposed_updates` staging table and reviewer UI
+- a true `proposed_updates` staging table and reviewer UI
 - idempotent email event ingestion keyed by message-id + attachment hash
 - replay evals over historical supplier communications
 - supplier-specific alias memory and template memory

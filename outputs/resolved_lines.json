@@ -9,7 +9,7 @@
       "total_price": 35000,
       "currency": null,
       "source": "attachment",
-      "confidence": 0.97
+      "confidence": 0.95
     },
     "decision": "no_action",
     "matched_product": {
@@ -44,7 +44,7 @@
       "total_price": 9000,
       "currency": null,
       "source": "attachment",
-      "confidence": 0.97
+      "confidence": 0.92
     },
     "decision": "no_action",
     "matched_product": {
@@ -74,7 +74,7 @@
       "total_price": null,
       "currency": null,
       "source": "attachment",
-      "confidence": 0.97
+      "confidence": 0.93
     },
     "decision": "auto_apply",
     "matched_product": {
@@ -109,7 +109,7 @@
       "total_price": null,
       "currency": null,
       "source": "attachment",
-      "confidence": 0.97
+      "confidence": 0.89
     },
     "decision": "auto_apply",
     "matched_product": {
@@ -141,7 +141,7 @@
       "total_price": null,
       "currency": null,
       "source": "attachment",
-      "confidence": 0.95
+      "confidence": 0.84
     },
     "decision": "review",
     "matched_product": null,

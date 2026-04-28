@@ -1,5 +1,5 @@
 {
-  "extraction_path": "/Users/openclaw/.openclaw/workspace/job-search/spherecast-agnes-assignment/outputs/extracted_live.json",
+  "extraction_path": "/Users/openclaw/.openclaw/workspace/job-search/spherecast-agnes-assignment/data/extracted_fixture.json",
   "passed": true,
   "passed_count": 6,
   "total_checks": 6,
