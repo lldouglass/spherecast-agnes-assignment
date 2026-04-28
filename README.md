@@ -1,13 +1,14 @@
 # Spherecast - Agnes take-home
 
-This submission treats the challenge as a **production-safe transaction ingestion problem**, not just a document extraction problem.
+This submission treats the challenge as a **transaction ingestion problem**, not just a document extraction problem.
 
-The core idea is simple:
+Main idea:
 
 > Do not let an LLM write directly into operational tables.
-> Use an extraction layer to produce structured candidates, then run deterministic resolution, validation, and apply-or-review decisions before anything touches production data.
+> First extract structured candidates.
+> Then use deterministic resolution, validation, and apply-or-review decisions before anything touches production data.
 
-That design choice is the difference between a flashy demo and a system that can safely support real purchase-order operations.
+That is the main design choice behind the whole solution.
 
 ## What is included
 
@@ -23,13 +24,13 @@ The prototype focuses on the hardest part of the problem:
 - matching noisy extracted fields to the right open PO and PO lines
 - deciding what can be auto-applied vs what must go to review
 - preserving provenance and safe automation boundaries
-- making stage outputs inspectable so model or rule changes are debuggable
+- making stage outputs inspectable so model or rule changes are easy to debug
 
 The repo includes both paths:
 - `data/extracted_fixture.json` for a deterministic offline run
 - `app/extract_live.py` for a real extraction call from the raw email text plus `data/sample_po.jpg` into resolver-compatible JSON
 
-That split is intentional. The riskiest production problem is not OCR in isolation. It is **corrupting production-critical data with false certainty**.
+That split is intentional. The hard part is not just reading the document. The hard part is avoiding bad writes into operational data.
 
 ## Requirements
 
@@ -167,21 +168,21 @@ OCR answers "what text is on the page?" Agnes needs to answer a stricter operati
 - which fields are safe to write automatically
 - which extracted values must be preserved but not written because the current schema has nowhere safe to put them
 
-The live extractor exists to prove that the resolver is wired to real raw inputs. The actual product value is in the **model + deterministic resolution + validation + review gating** stack, not in text recognition alone.
+The live extractor exists to show that the resolver is wired to real raw inputs. The real value is in the **extraction + deterministic resolution + validation + review gating** stack, not in text recognition alone.
 
 ## Logging, observability, and regression safety
 
-The CEO note also called out observability and safe stage swaps.
+Leon also called out observability and safe stage swaps.
 
-This repo addresses that in three concrete ways:
+This repo handles that in three concrete ways:
 
 1. **Trace artifact**
-   - `outputs/pipeline_trace.json` makes stage outputs and decisions inspectable.
-   - It is meant to answer, "what happened at each stage, and why?"
+   - `outputs/pipeline_trace.json` shows stage outputs and decisions.
+   - It answers, "what happened at each stage, and why?"
 
 2. **Regression harness**
-   - `app/eval_sample.py` checks the operationally important outcomes, not just whether the code ran.
-   - `verify.sh` also validates the mocked live extraction request shape so swapping models/prompts/adapters is less likely to fail silently.
+   - `app/eval_sample.py` checks the important operational outcomes, not just whether the code ran.
+   - `verify.sh` also validates the mocked live extraction request shape, so changing models, prompts, or adapters is less likely to fail silently.
 
 3. **Separation of concerns**
    - extraction can change without giving the model direct write access
@@ -221,4 +222,4 @@ I would add:
 - idempotent email event ingestion keyed by message-id + attachment hash
 - replay evals over historical supplier communications
 - supplier-specific alias memory and template memory
-- observability for auto-apply rate, override rate, unmatched rate, and supplier drift
+- better observability for auto-apply rate, override rate, unmatched rate, and supplier drift
